@@ -1,19 +1,24 @@
-# Richard Oldham 
-# Masters thesis power analysis
+## Richard Oldham 
+## Masters thesis power analysis
 
-# Set model parameters; the effects are sources of variance for task completion time
+# Begin model parameters
 Nsubjects = 18
-method_effect= c(A=18, B=15)
+# Mean task completion time for H0 and HA
+method_effect= c(A=18, B=15.5)
+
+# Begin sources of variance
 method_sd = c(A=5, B=4.5)
 person_effect = rnorm(Nsubjects, 0, 5)
-# KEY ASSUMPTION: no variance of time due to case due to fractional factorial design
+# KEY ASSUMPTION: no variance of time due to case
 case_effect = c(0,0)
 # All other sources of variance
 unsystematic_sd = 2
+# End model parameters
 
-## Construct data frame
+## Construct data frame(person, case, method); no explicit use of as.factor for subjects and case due to needing to select only a fraction of factorial (tempOK). I use as.factor() for the simulation below
 temp= expand.grid(1:Nsubjects, 1:2, c("A","B"))
 names(temp) = c("Person","Case","Method")
+str(temp)
 # Select fraction of total comb
 tempOK = temp$Person + temp$Case + match(temp$Method, unique(temp$Method))
 temp = temp[ (tempOK %% 2)==0 , ]
@@ -26,7 +31,7 @@ dframe = temp[with(temp, order(Person, Method)), ]
 row.names(dframe) = 1:nrow(temp)
 dframe
 
-# Looping over dframe
+# Simulate experiment, looping over dframe H0 and HA xNREPS
 NREPS = 2000
 
 pValues = sapply(1:NREPS, function(ignoreMe) {
@@ -45,6 +50,6 @@ pValues = sapply(1:NREPS, function(ignoreMe) {
 summary(pValues)
 mean(pValues < 0.05)
 
-#powerSim
+#powerSim viz
 require(NCStats)
 powerSim(mu0=method_effect['A'], s.mua=method_effect['B'], s.sigma=5, s.n=20, s.alpha=0.05, lower.tail=TRUE)
