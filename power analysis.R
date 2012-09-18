@@ -2,21 +2,23 @@
 ## Masters thesis power analysis
 
 # Begin model parameters
-Nsubjects = 20
+Nsubjects = 18
 # Mean task completion time for H0 and HA
-method_effect= c(A=18, B=16)
+method_effect= c(A=18, B=15)
+# Lambda mean error rates for H0 and HA;
+lambda = c(A=1, B=0.5)
 
 # Begin sources of variance
-method_sd = c(A=5, B=5)
-person_effect = rnorm(Nsubjects, 0, 5)
-# KEY ASSUMPTION: no variance of time due to case
-case_effect = c(0,0)
+method_sd = c(A=5, B=4)
+person_effect = rnorm(Nsubjects, 0, 4)
+# KEY ASSUMPTION: variance due to case?
+case_effect = c(1,0)
 # All other sources of variance
-unsystematic_sd = 4
+unsystematic_sd = 3
 # End model parameters
 
-## Construct data frame(person, case, method); no explicit use of as.factor for subjects and case due to needing to select only a fraction of factorial (tempOK). I use as.factor() for the simulation below
-temp= expand.grid(1:Nsubjects, 1:2, c("A","B"))
+## Construct data frame(person, case, method); no explicit use of as.factor for subjects and case due to needing to select only a fraction of factorial (tempOK).
+temp = expand.grid(1:Nsubjects, 1:2, c("A","B"))
 names(temp) = c("Person","Case","Method")
 str(temp)
 # Select fraction of total comb
@@ -26,6 +28,10 @@ temp = temp[ (tempOK %% 2)==0 , ]
 # Generate model task completion times
 temp$Time = case_effect[temp$Case] + person_effect[temp$Person] + method_effect[temp$Method] + rnorm(1, 0, method_sd[temp$Method]) + rnorm(nrow(temp), 0, unsystematic_sd)
 
+# Generate error rates
+temp$Error = rpois(n=Nsubjects, lambda=lambda)
+temp
+
 # Clean up and assign temp to dframe
 dframe = temp[with(temp, order(Person, Method)), ]
 row.names(dframe) = 1:nrow(temp)
@@ -33,7 +39,7 @@ dframe
 
 # Simulate experiment, looping over dframe H0 and HA xNREPS
 NREPS = 2000
-Nsubjects = 20
+Nsubjects = 18
 
 pValues = sapply(1:NREPS, function(ignoreMe) {
   dframe = expand.grid(as.factor(1:2), c("A","B"), as.factor(1:Nsubjects))
