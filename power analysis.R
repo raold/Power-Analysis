@@ -2,17 +2,17 @@
 ## Masters thesis power analysis
 
 # Begin model parameters
-Nsubjects = 18
+Nsubjects = 20
 # Mean task completion time for H0 and HA
-method_effect= c(A=18, B=15.5)
+method_effect= c(A=18, B=16)
 
 # Begin sources of variance
-method_sd = c(A=5, B=4.5)
+method_sd = c(A=5, B=5)
 person_effect = rnorm(Nsubjects, 0, 5)
 # KEY ASSUMPTION: no variance of time due to case
 case_effect = c(0,0)
 # All other sources of variance
-unsystematic_sd = 2
+unsystematic_sd = 4
 # End model parameters
 
 ## Construct data frame(person, case, method); no explicit use of as.factor for subjects and case due to needing to select only a fraction of factorial (tempOK). I use as.factor() for the simulation below
@@ -33,6 +33,7 @@ dframe
 
 # Simulate experiment, looping over dframe H0 and HA xNREPS
 NREPS = 2000
+Nsubjects = 20
 
 pValues = sapply(1:NREPS, function(ignoreMe) {
   dframe = expand.grid(as.factor(1:2), c("A","B"), as.factor(1:Nsubjects))
@@ -52,4 +53,4 @@ mean(pValues < 0.05)
 
 #powerSim viz
 require(NCStats)
-powerSim(mu0=method_effect['A'], s.mua=method_effect['B'], s.sigma=5, s.n=20, s.alpha=0.05, lower.tail=TRUE)
+powerSim(mu0=method_effect['A'], s.mua=method_effect['B'], s.sigma=5, s.n=Nsubjects, s.alpha=0.05, lower.tail=TRUE)
